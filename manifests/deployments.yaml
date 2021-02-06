@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gogallery-backend
+  labels:
+    app: gogallery-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gogallery-backend
+  template:
+    metadata:
+      labels:
+        app: gogallery-backend
+    spec:
+      containers:
+        - name: gogallery-backend
+          image: backend
+          ports:
+            - containerPort: 80
+              name: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gogallery-frontend
+  labels:
+    app: gogallery-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gogallery-frontend
+  template:
+    metadata:
+      labels:
+        app: gogallery-frontend
+    spec:
+      containers:
+        - name: gogallery-frontend
+          image: frontend
+          ports:
+            - containerPort: 80
+              name: http

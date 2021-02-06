@@ -1,0 +1,7 @@
+FROM golang:1.16rc1
+WORKDIR /app
+COPY go.mod /app/go.mod
+RUN go mod download
+COPY . /app/
+RUN go build cmd/gogallery.go
+ENTRYPOINT /app/gogallery

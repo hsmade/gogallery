@@ -1,0 +1,17 @@
+apiVersion: skaffold/v2beta11
+kind: Config
+metadata:
+  name: gogallery
+build:
+  artifacts:
+  - image: backend
+    docker:
+      dockerfile: Dockerfile.backend
+  - image: frontend
+    docker:
+      dockerfile: Dockerfile.frontend
+deploy:
+  kubectl:
+    manifests:
+    - manifests/deployments.yaml
+    - manifests/services.yaml
