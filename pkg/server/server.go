@@ -3,10 +3,13 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
+	"path/filepath"
 )
 
 type Server struct {
@@ -15,23 +18,28 @@ type Server struct {
 }
 
 type Error struct {
-	ErrorMessage string
-	Error        error
+	Message string
+	Error   error
+	Code    int
 }
 
 func (e Error) Send(w http.ResponseWriter) {
-	logrus.WithError(e.Error).Errorf("sending error: %s", e.ErrorMessage)
-	w.WriteHeader(500)
+	if e.Code == 0 {
+		e.Code = 500
+	}
+	logrus.WithError(e.Error).Errorf("sending error: %v", e.Message)
+	w.WriteHeader(e.Code)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(Error{"missing path parameter", nil})
+	_ = json.NewEncoder(w).Encode(e)
 }
 
 // New creates a new Server
-func New(listenPort int, rootPath string) Server {
+func New(listenPort int, rootPath string) (Server, error) {
+	absPath, err := filepath.Abs(rootPath)
 	return Server{
 		ListenPort: listenPort,
-		RootPath:   rootPath,
-	}
+		RootPath:   absPath,
+	}, err
 }
 
 // Run starts a new Server
@@ -48,30 +56,34 @@ func (s *Server) listHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(500)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode([]string{})
+	_ = json.NewEncoder(w).Encode([]string{})
 }
 
 // downloadHandler handles downloading a file
 func (s *Server) downloadHandler(w http.ResponseWriter, r *http.Request) {
 	logrus.Debugf("downloadHandler called with %v", r.URL.RawQuery)
-	path, ok := r.URL.Query()["path"]
+	filePath, ok := r.URL.Query()["path"]
 	if !ok {
-		Error{"missing path parameter", nil}.Send(w)
+		Error{Message: "missing path parameter"}.Send(w)
 	}
 
-	file, err := os.Open(path[0])
+	// make sure path is valid and inside the root path
+	finalPath := filepath.Join(s.RootPath, filepath.FromSlash(path.Clean("/"+filePath[0])))
+
+	file, err := os.Open(finalPath)
 	if err != nil {
 		Error{
-			ErrorMessage: "error while opening file",
-			Error:        err,
+			Message: "error while opening file",
+			Error:   err,
+			Code:    404,
 		}.Send(w)
 		return
 	}
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
 		Error{
-			ErrorMessage: "error while reading file",
-			Error:        err,
+			Message: "error while reading file",
+			Error:   err,
 		}.Send(w)
 		return
 	}
@@ -79,29 +91,27 @@ func (s *Server) downloadHandler(w http.ResponseWriter, r *http.Request) {
 	contentType, err := GetFileContentType(file)
 	if err != nil {
 		Error{
-			ErrorMessage: "error while determining content type for file",
-			Error:        err,
+			Message: "error while determining content type for file",
+			Error:   err,
 		}.Send(w)
 		return
 	}
 
 	w.Header().Set("Content-Type", contentType)
-	w.Write(content)
+	_, _ = w.Write(content)
 }
 
-func GetFileContentType(out *os.File) (string, error) {
-
-	// Only the first 512 bytes are used to sniff the content type.
+// GetFileContentType finds the content type for a file
+func GetFileContentType(file *os.File) (string, error) {
+	logrus.Debugf("determining content type for file %v", file.Name())
 	buffer := make([]byte, 512)
 
-	_, err := out.Read(buffer)
+	_, _ = file.Seek(0, 0)
+	_, err := file.Read(buffer)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "reading file")
 	}
 
-	// Use the net/http package's handy DectectContentType function. Always returns a valid
-	// content-type by returning "application/octet-stream" if no others seemed to match.
 	contentType := http.DetectContentType(buffer)
-
 	return contentType, nil
 }
