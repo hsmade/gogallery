@@ -3,5 +3,7 @@ WORKDIR /app
 COPY go.mod /app/go.mod
 RUN go mod download
 COPY . /app/
+RUN go test ./...
+RUN go vet ./...
 RUN go build cmd/gogallery.go
 ENTRYPOINT /app/gogallery
