@@ -23,6 +23,9 @@ func main() {
 		logrus.Debug("enabled debug level")
 	}
 
-	s := server.New(listenPort, rootPath)
+	s, err := server.New(listenPort, rootPath)
+	if err != nil {
+		logrus.Fatal(err)
+	}
 	logrus.Fatal(s.Run())
 }
