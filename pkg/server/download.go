@@ -16,9 +16,11 @@ func (s *Server) downloadHandler(w http.ResponseWriter, r *http.Request) {
 	filePath, ok := r.URL.Query()["path"]
 	if !ok {
 		Error{Message: "missing path parameter"}.Send(w)
+		return
 	}
 
-	// make sure path is valid and inside the root path
+	// make sure path is always inside the root path
+	// This was copied from https://github.com/golang/go/blob/7211694a1e3f9eaebff7074944feead968e00e72/src/net/http/fs.go#L79
 	finalPath := filepath.Join(s.RootPath, filepath.FromSlash(path.Clean("/"+filePath[0])))
 
 	file, err := os.Open(finalPath)
@@ -30,6 +32,8 @@ func (s *Server) downloadHandler(w http.ResponseWriter, r *http.Request) {
 		}.Send(w)
 		return
 	}
+	defer file.Close()
+
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
 		Error{

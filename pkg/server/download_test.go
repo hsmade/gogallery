@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -10,6 +11,27 @@ import (
 	"path"
 	"testing"
 )
+
+func TestServer_downloadHandler_no_path(t *testing.T) {
+	s := &Server{}
+
+	req, err := http.NewRequest("GET", "/download", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(s.downloadHandler)
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != 500 {
+		t.Errorf("expected code 500, but got: %d", rr.Code)
+	}
+
+	errorObject, _ := json.Marshal(Error{Message: "missing path parameter", Code: 500})
+	if bytes.Compare(errorObject, bytes.TrimRight(rr.Body.Bytes(), " \n")) != 0 {
+		t.Errorf("Got unexpected json: %s", rr.Body.String())
+	}
+}
 
 func TestServer_downloadHandler(t *testing.T) {
 	tests := []struct {
@@ -90,7 +112,7 @@ func TestServer_downloadHandler(t *testing.T) {
 					t.Fatalf("Can't read expected file: %v", err)
 				}
 
-				if bytes.Compare(expectedContent, rr.Body.Bytes()) > 0 {
+				if bytes.Compare(expectedContent, rr.Body.Bytes()) != 0 {
 					t.Error("did not receive expected content")
 					t.Logf("expected: %s\ngot: %s", expectedContent, rr.Body.Bytes())
 				}
