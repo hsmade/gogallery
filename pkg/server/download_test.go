@@ -28,7 +28,7 @@ func TestServer_downloadHandler_no_path(t *testing.T) {
 	}
 
 	errorObject, _ := json.Marshal(Error{Message: "missing path parameter", Code: 500})
-	if bytes.Compare(errorObject, bytes.TrimRight(rr.Body.Bytes(), " \n")) != 0 {
+	if bytes.Equal(errorObject, bytes.TrimRight(rr.Body.Bytes(), " \n")) {
 		t.Errorf("Got unexpected json: %s", rr.Body.String())
 	}
 }
@@ -112,7 +112,7 @@ func TestServer_downloadHandler(t *testing.T) {
 					t.Fatalf("Can't read expected file: %v", err)
 				}
 
-				if bytes.Compare(expectedContent, rr.Body.Bytes()) != 0 {
+				if bytes.Equal(expectedContent, rr.Body.Bytes()) {
 					t.Error("did not receive expected content")
 					t.Logf("expected: %s\ngot: %s", expectedContent, rr.Body.Bytes())
 				}
