@@ -37,6 +37,7 @@ func TestServer_listHandler(t *testing.T) {
 		name         string
 		responseCode int
 		path         string
+		response     []byte
 	}{
 		{
 			name:         "should error on nonexistent path",
@@ -49,7 +50,10 @@ func TestServer_listHandler(t *testing.T) {
 			responseCode: 500,
 		},
 		{
-			name: "should return list of files",
+			name:         "should return list of files",
+			path:         ".",
+			responseCode: 200,
+			response:     []byte("bla"),
 		},
 	}
 	for _, tt := range tests {
@@ -76,7 +80,9 @@ func TestServer_listHandler(t *testing.T) {
 				t.Log(rr.Body.String())
 			}
 
-			// TODO: test response body
+			if tt.response != nil && !bytes.Equal(tt.response, rr.Body.Bytes()) {
+				t.Errorf("response expected: '%s', but got '%s'", tt.response, rr.Body.String())
+			}
 		})
 	}
 }

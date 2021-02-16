@@ -38,6 +38,7 @@ func TestServer_GetFileContentType(t *testing.T) {
 			if err != nil {
 				t.Fatalf("can't open requested file: %v", err)
 			}
+			defer file.Close()
 			contentType, err := GetFileContentType(file)
 			if err != nil && !tt.wantError {
 				t.Errorf("got unexpected error: %v", err)

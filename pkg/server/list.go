@@ -41,6 +41,10 @@ func (s *Server) listHandler(w http.ResponseWriter, r *http.Request) {
 	go helpers.Keepalive(ctx, w)
 	err, files := getOrCreateIndex(finalPath)
 	cancel()
+	if err != nil {
+		Error{Message: "Could not get index", Error: err}.Send(w)
+		return
+	}
 	_ = json.NewEncoder(w).Encode(files)
 }
 

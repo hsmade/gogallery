@@ -106,6 +106,7 @@ func TestServer_downloadHandler(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Can't open expected file: %v", err)
 				}
+				defer expectedFile.Close()
 
 				expectedContent, err := ioutil.ReadAll(expectedFile)
 				if err != nil {
