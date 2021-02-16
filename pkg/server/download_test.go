@@ -28,7 +28,7 @@ func TestServer_downloadHandler_no_path(t *testing.T) {
 	}
 
 	errorObject, _ := json.Marshal(Error{Message: "missing path parameter", Code: 500})
-	if bytes.Equal(errorObject, bytes.TrimRight(rr.Body.Bytes(), " \n")) {
+	if !bytes.Equal(errorObject, bytes.TrimRight(rr.Body.Bytes(), " \n")) {
 		t.Errorf("Got unexpected json: %s", rr.Body.String())
 	}
 }
@@ -56,11 +56,11 @@ func TestServer_downloadHandler(t *testing.T) {
 			contentType:  "image/gif",
 		},
 		{
-			name:         "download gif picture, subdir",
+			name:         "download jpeg picture, subdir",
 			responseCode: 200,
-			file:         "../testfiles/subdir/green.gif",
-			path:         "subdir/green.gif",
-			contentType:  "image/gif",
+			file:         "../testfiles/subdir/green.jpg",
+			path:         "subdir/green.jpg",
+			contentType:  "image/jpeg",
 		},
 		{
 			name:         "download outside of path",
@@ -113,7 +113,7 @@ func TestServer_downloadHandler(t *testing.T) {
 					t.Fatalf("Can't read expected file: %v", err)
 				}
 
-				if bytes.Equal(expectedContent, rr.Body.Bytes()) {
+				if !bytes.Equal(expectedContent, rr.Body.Bytes()) {
 					t.Error("did not receive expected content")
 					t.Logf("expected: %s\ngot: %s", expectedContent, rr.Body.Bytes())
 				}

@@ -1,0 +1,13 @@
+syntax = "proto3";
+option go_package = "github.com/hsmade/gogallery/pkg/thumbs/protobuf";
+package proto;
+
+message Thumbs {
+  repeated proto.Thumb thumb = 1;
+}
+
+message Thumb {
+  string name = 1;
+  bytes exifdata = 2;
+  bytes thumbnail = 3;
+}

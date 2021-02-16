@@ -27,7 +27,7 @@ func TestServer_listHandler_no_path(t *testing.T) {
 	}
 
 	errorObject, _ := json.Marshal(Error{Message: "missing path parameter", Code: 500})
-	if bytes.Equal(errorObject, bytes.TrimRight(rr.Body.Bytes(), " \n")) {
+	if !bytes.Equal(errorObject, bytes.TrimRight(rr.Body.Bytes(), " \n")) {
 		t.Errorf("Got unexpected json: %s", rr.Body.String())
 	}
 }
