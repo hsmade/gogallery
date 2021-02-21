@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/hsmade/gogallery/pkg/helpers"
+	"github.com/hsmade/gogallery/pkg/thumbs"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
@@ -39,7 +41,7 @@ func (s *Server) listHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go helpers.Keepalive(ctx, w)
-	err, files := getOrCreateIndex(finalPath)
+	files, err := getOrCreateIndex(finalPath)
 	cancel()
 	if err != nil {
 		Error{Message: "Could not get index", Error: err}.Send(w)
@@ -48,20 +50,33 @@ func (s *Server) listHandler(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(files)
 }
 
+type Index struct {
+	thumbs.Thumbs
+	Directories []string
+}
+
 // getOrCreateIndex will check for the thumbs.db file to be there and create one if it's older than the directory or
-// nonexistent. getOrCreateIndex will return a list of file objects
-func getOrCreateIndex(path string) (error, []*interface{}) {
-	//files, err := ioutil.ReadDir(finalPath)
-	//if err != nil {
-	//	Error{Message: "Failed to read directory", Error: err}.Send(w)
-	//	return
-	//}
+// nonexistent. getOrCreateIndex will return a list of files and directory objects
+func getOrCreateIndex(path string) (Index, error) {
 
 	// serialize list of struct
 	//   filename
 	//   date
 	//   location?
 	//   thumb
+	thumbsDb, err := thumbs.Create(path)
+	if err != nil {
+		return Index{}, errors.Wrap(err, "generating thumbs")
+	}
 
-	return nil, nil
+	directories, err := helpers.GetDirs(path)
+	if err != nil {
+		return Index{}, errors.Wrap(err, "getting directories")
+	}
+
+	index := Index{
+		Thumbs:      thumbsDb,
+		Directories: directories,
+	}
+	return index, nil
 }

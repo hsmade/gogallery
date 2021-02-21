@@ -13,7 +13,7 @@ import (
 	"os"
 )
 
-func CreateThumbImage(path string) (*[]byte, error) {
+func CreateThumbImage(path string) ([]byte, error) {
 	logrus.Debugf("creating thumbnail image from '%s", path)
 	file, err := os.Open(path)
 	if err != nil {
@@ -50,7 +50,7 @@ func CreateThumbImage(path string) (*[]byte, error) {
 	return nil, errors.New(fmt.Sprintf("Could not decode image with path '%s'", path))
 }
 
-func resizeImage(img image.Image) (*[]byte, error) {
+func resizeImage(img image.Image) ([]byte, error) {
 	logrus.Debugf("creating thumbnail image")
 	resized := resize.Thumbnail(128, 128, img, resize.Lanczos3)
 	buffer := bytes.Buffer{}
@@ -58,6 +58,5 @@ func resizeImage(img image.Image) (*[]byte, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "encoding thumbnail")
 	}
-	b := buffer.Bytes()
-	return &b, nil
+	return buffer.Bytes(), nil
 }

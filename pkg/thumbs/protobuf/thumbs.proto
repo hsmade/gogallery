@@ -8,6 +8,6 @@ message Thumbs {
 
 message Thumb {
   string name = 1;
-  bytes exifdata = 2;
+  map<string, string> exifdata = 2;
   bytes thumbnail = 3;
 }

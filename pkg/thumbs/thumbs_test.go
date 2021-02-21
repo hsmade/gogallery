@@ -20,16 +20,16 @@ func TestCreate(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    *Thumbs
+		want    Thumbs
 		wantErr bool
 	}{
 		{
 			name:    "happy path without exif",
 			args:    args{path: path.Join(cwd, "../testfiles")},
 			wantErr: false,
-			want: &Thumbs{
+			want: Thumbs{
 				Path: path.Join(cwd, "../testfiles"),
-				Files: []*thumbFile{
+				Files: []thumbFile{
 					{
 						Name:  "blue.gif",
 						Exif:  nil,
@@ -47,9 +47,9 @@ func TestCreate(t *testing.T) {
 			name:    "happy path with exif",
 			args:    args{path: path.Join(cwd, "../testfiles/subdir")},
 			wantErr: false,
-			want: &Thumbs{
+			want: Thumbs{
 				Path: path.Join(cwd, "../testfiles/subdir"),
-				Files: []*thumbFile{
+				Files: []thumbFile{
 					{
 						Name:  "green.jpg",
 						Exif:  data.GreenExif(),
@@ -62,9 +62,9 @@ func TestCreate(t *testing.T) {
 			name:    "happy path with invalid file",
 			args:    args{path: path.Join(cwd, "../testfiles/broken")},
 			wantErr: false,
-			want: &Thumbs{
+			want: Thumbs{
 				Path:  path.Join(cwd, "../testfiles/broken"),
-				Files: []*thumbFile{},
+				Files: []thumbFile{},
 			},
 		},
 	}
@@ -103,7 +103,7 @@ func TestLoad(t *testing.T) {
 			args: args{path: path.Join(cwd, "../testfiles/thumbdir")},
 			want: &Thumbs{
 				Path: path.Join(cwd, "../testfiles/thumbdir"),
-				Files: []*thumbFile{
+				Files: []thumbFile{
 					{
 						Name:  "green.jpg",
 						Exif:  data.GreenExif(),
@@ -131,7 +131,7 @@ func TestLoad(t *testing.T) {
 func TestThumbs_addImage(t1 *testing.T) {
 	type fields struct {
 		Path  string
-		Files []*thumbFile
+		Files []thumbFile
 	}
 	type args struct {
 		path string
@@ -160,7 +160,7 @@ func TestThumbs_addImage(t1 *testing.T) {
 func TestThumbs_save(t1 *testing.T) {
 	type fields struct {
 		Path  string
-		Files []*thumbFile
+		Files []thumbFile
 	}
 	tests := []struct {
 		name    string

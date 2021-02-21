@@ -1,9 +1,12 @@
-FROM golang:1.16rc1
+FROM golang:1.16
 WORKDIR /app
+RUN apt update
+RUN apt install -y protobuf-compiler/stable
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.25.0
 COPY go.mod /app/go.mod
 RUN go mod download
 COPY . /app/
-RUN go test ./...
+#RUN go test ./...
 RUN go vet ./...
 RUN go generate ./...
 RUN go build cmd/gogallery.go

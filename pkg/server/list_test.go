@@ -50,10 +50,10 @@ func TestServer_listHandler(t *testing.T) {
 			responseCode: 500,
 		},
 		{
-			name:         "should return list of files",
-			path:         ".",
+			name:         "should return list of files and directories",
+			path:         "/",
 			responseCode: 200,
-			response:     []byte("bla"),
+			response:     []byte("{\"Path\":\"/Users/wim/git/gogallery/pkg/testfiles\",\"Files\":[{\"Name\":\"blue.gif\",\"Exif\":null,\"Image\":\"iVBORw0KGgoAAAANSUhEUgAAAIAAAACAEAIAAAAczCrfAAABdElEQVR4nOzTMRHAMADEsL9e+VNOYGSwhMCL/207Z5D0vQ6AlwxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgDQDkGYA0gxAmgFIMwBpBiDNAKQZgLQbAAD//26HAwHo5H+2AAAAAElFTkSuQmCC\"},{\"Name\":\"gray.png\",\"Exif\":null,\"Image\":\"iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABM0lEQVR4nOzRUQnAMADFwDEq/EmvjPtoTkEgZ9sX59cBr2sA1gCsAVgDsAZgDcAagDUAawDWAKwBWAOwBmANwBqANQBrANYArAFYA7AGYA3AGoA1AGsA1gCsAVgDsAZgDcAagDUAawDWAKwBWAOwBmANwBqANQBrANYArAFYA7AGYA3AGoA1AGsA1gCsAVgDsAZgDcAagDUAawDWAKwBWAOwBmANwBqANQBrANYArAFYA7AGYA3AGoA1AGsA1gCsAVgDsAZgDcAagDUAawDWAKwBWAOwBmANwBqANQBrANYArAFYA7AGYA3AGoA1AGsA1gCsAVgDsAZgDcAagDUAawDWAKwBWAOwBmANwBqANQBrANYArAFYA7AGYA3AGoA1AGsA1gCsAVgDsAZgDcBuAAAA//8VvAKDziUC7wAAAABJRU5ErkJggg==\"}],\"Directories\":[\"broken\",\"data\",\"subdir\",\"thumbdir\"]}\n"),
 		},
 	}
 	for _, tt := range tests {
@@ -81,7 +81,7 @@ func TestServer_listHandler(t *testing.T) {
 			}
 
 			if tt.response != nil && !bytes.Equal(tt.response, rr.Body.Bytes()) {
-				t.Errorf("response expected: '%s', but got '%s'", tt.response, rr.Body.String())
+				t.Errorf("response expected:\n'%s'\nbut got:\n'%s'\n", tt.response, rr.Body.String())
 			}
 		})
 	}

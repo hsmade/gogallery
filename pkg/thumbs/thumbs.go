@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
 )
 
 func init() {
@@ -20,24 +21,24 @@ func init() {
 
 type Thumbs struct {
 	Path  string
-	Files []*thumbFile
+	Files []thumbFile
 }
 
 type thumbFile struct {
 	Name  string
-	Exif  *exif.Exif
-	Image *[]byte
+	Exif  map[string]string
+	Image []byte
 }
 
-func (t *thumbFile) String() string {
+func (t thumbFile) String() string {
 	if t.Exif != nil {
-		return fmt.Sprintf("Name: '%s', Exif: '%s', image: %x.", t.Name, t.Exif.String(), *t.Image)
+		return fmt.Sprintf("Name: '%s', Exif: '%v', image: %x.", t.Name, t.Exif, t.Image)
 	}
-	return fmt.Sprintf("Name: '%s', Exif: empty, image: %x.", t.Name, *t.Image)
+	return fmt.Sprintf("Name: '%s', Exif: empty, image: %x.", t.Name, t.Image)
 }
 
-func (t *thumbFile) Equal(b *thumbFile) bool {
-	part1 := t.Name == b.Name && bytes.Equal(*t.Image, *b.Image)
+func (t thumbFile) Equal(b thumbFile) bool {
+	part1 := t.Name == b.Name && bytes.Equal(t.Image, b.Image)
 	if !part1 {
 		return false
 	}
@@ -50,10 +51,10 @@ func (t *thumbFile) Equal(b *thumbFile) bool {
 		return false
 	}
 
-	return part1 && bytes.Equal(t.Exif.Raw, b.Exif.Raw)
+	return part1 && reflect.DeepEqual(t.Exif, b.Exif)
 }
 
-func (t *Thumbs) Equal(b *Thumbs) bool {
+func (t Thumbs) Equal(b Thumbs) bool {
 	if t.Path != b.Path {
 		return false
 	}
@@ -66,23 +67,23 @@ func (t *Thumbs) Equal(b *Thumbs) bool {
 }
 
 // Load creates a new Thumbs object from a path
-func Load(path string) (*Thumbs, error) {
+func Load(path string) (Thumbs, error) {
 	logrus.Debugf("loading thumbs file from path '%s'", path)
 	file, err := os.Open(filepath.Join(path, "thumbs.bin"))
 	if err != nil {
-		return nil, errors.Wrap(err, "opening thumb file")
+		return Thumbs{}, errors.Wrap(err, "opening thumb file")
 	}
 	defer file.Close()
 
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
-		return nil, errors.Wrap(err, "reading thumb file")
+		return Thumbs{}, errors.Wrap(err, "reading thumb file")
 	}
 
 	thumbsBuffer := protobuf.Thumbs{}
 	err = proto.Unmarshal(data, &thumbsBuffer)
 	if err != nil {
-		return nil, errors.Wrap(err, "decoding thumb file")
+		return Thumbs{}, errors.Wrap(err, "decoding thumb file")
 	}
 
 	thumbs := Thumbs{
@@ -90,28 +91,24 @@ func Load(path string) (*Thumbs, error) {
 	}
 
 	for _, thumbBuffer := range thumbsBuffer.Thumb {
-		exifData, err := exif.Decode(file) // FIXME: somehow reproduce the exif data from the raw
-		if err != nil {
-			return &thumbs, errors.Wrap(err, "decoding file")
-		}
 		thumb := thumbFile{
 			Name:  thumbBuffer.Name,
-			Exif:  exifData,
-			Image: &thumbBuffer.Thumbnail,
+			Exif:  thumbBuffer.Exifdata,
+			Image: thumbBuffer.Thumbnail,
 		}
-		thumbs.Files = append(thumbs.Files, &thumb)
+		thumbs.Files = append(thumbs.Files, thumb)
 	}
-	return &thumbs, nil
+	return thumbs, nil
 }
 
 // Create scans a path for images and creates a new Thumbs object
-func Create(path string) (*Thumbs, error) {
+func Create(path string) (Thumbs, error) {
 	logrus.Debugf("creating new thumbs object for path '%s'", path)
 	thumbs := Thumbs{Path: path}
 
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
-		return nil, errors.Wrap(err, "reading directory")
+		return Thumbs{}, errors.Wrap(err, "reading directory")
 	}
 
 	for _, fileInfo := range files {
@@ -124,7 +121,7 @@ func Create(path string) (*Thumbs, error) {
 		}
 	}
 
-	return &thumbs, thumbs.save()
+	return thumbs, thumbs.save()
 }
 
 // save stores the Thumbs file
@@ -134,10 +131,10 @@ func (t *Thumbs) save() error {
 	for _, thumb := range t.Files {
 		thumbBuffer := protobuf.Thumb{
 			Name:      thumb.Name,
-			Thumbnail: *thumb.Image,
+			Thumbnail: thumb.Image,
 		}
 		if thumb.Exif != nil {
-			thumbBuffer.Exifdata = thumb.Exif.Raw
+			thumbBuffer.Exifdata = thumb.Exif
 		}
 
 		thumbsBuffer.Thumb = append(thumbsBuffer.Thumb, &thumbBuffer)
@@ -157,16 +154,10 @@ func (t *Thumbs) save() error {
 
 func (t *Thumbs) addImage(path string) error {
 	logrus.Debugf("adding image with path '%s' to thumbs object for path '%s'", path, t.Path)
-	file, err := os.Open(filepath.Join(t.Path, path))
-	if err != nil {
-		return errors.Wrap(err, "opening file")
-	}
-
-	exifData, err := exif.Decode(file)
+	exifData, err := ExtractExif(path)
 	if err != nil {
 		logrus.Debugf("file has no or invalid exif data: '%s'", filepath.Join(t.Path, path))
 	}
-	_ = file.Close()
 
 	thumb := thumbFile{
 		Name: path,
@@ -179,6 +170,6 @@ func (t *Thumbs) addImage(path string) error {
 	}
 	thumb.Image = img
 
-	t.Files = append(t.Files, &thumb)
+	t.Files = append(t.Files, thumb)
 	return nil
 }

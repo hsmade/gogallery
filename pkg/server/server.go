@@ -23,6 +23,7 @@ func New(listenPort int, rootPath string) (Server, error) {
 
 // Run starts a new Server
 func (s *Server) Run() error {
+	logrus.Infof("starting new server on port: %d with path: '%s'", s.ListenPort, s.RootPath)
 	http.HandleFunc("/list", s.listHandler)
 	http.HandleFunc("/download", s.downloadHandler)
 	logrus.Infof("starting webserver on port %d", s.ListenPort)
