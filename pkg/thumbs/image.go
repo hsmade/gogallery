@@ -52,7 +52,7 @@ func CreateThumbImage(path string) ([]byte, error) {
 
 func resizeImage(img image.Image) ([]byte, error) {
 	logrus.Debugf("creating thumbnail image")
-	resized := resize.Thumbnail(128, 128, img, resize.Lanczos3)
+	resized := resize.Thumbnail(256, 256, img, resize.Lanczos3)
 	buffer := bytes.Buffer{}
 	err := png.Encode(&buffer, resized)
 	if err != nil {

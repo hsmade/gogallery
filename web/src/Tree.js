@@ -2,25 +2,31 @@ import React, {Component} from 'react';
 
 class Tree extends Component {
     render() {
-
-        let dir_up
-        if (this.props.path !== "/") {
-            let dir_components = this.props.path.split("/")
-            dir_components.pop()
-            dir_up = <li key="up"><a href={"?path=" + dir_components.join("/")}>Terug</a></li>
-        }
-        const dirs = this.props.dirs.map((dir) =>
-            <li key={dir}><a href={"?path=" + this.props.path  + "/" + dir}>{dir}</a></li>
-        )
-
-        // show link per path's component, with indents
-        // show dirs at the bottom, as list
         return (
             <div>
-                {dir_up}
-                {dirs}
+                {treeItem([], this.props.path.split("/"), this.props.dirs)}
             </div>
         );
     }
 }
+
+// function that renders a <ul> with the first part of `right` as item
+// Then calls itself with left having that part pushed into it.
+function treeItem(left, right, dirs) {
+    if (right.length === 0) {
+        const items = dirs.map((dir) =>
+            <li key={dir}><a href={"?path=" + left.join("/")  + "/" + dir}>|- {dir}</a></li>
+        )
+        return <ul>{items}</ul>
+    }
+
+    const current = right.shift()
+    left.push(current)
+    return <ul>
+        <li>
+            <a href={"?path=" + left.join("/")}>|- {current}/</a>
+        </li>
+        {treeItem(left, right, dirs)}</ul>
+}
+
 export default Tree

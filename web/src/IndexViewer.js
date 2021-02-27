@@ -21,25 +21,28 @@ class IndexViewer extends Component {
 
         let images
         if (this.state.entries.Files != null) {
-            images = this.state.entries.Files.map((image) => {
-                const path = this.props.path.replace("/\/$/","") + "/" + image.Name;
-                return <a key={image.Name} href={"http://localhost:8080/download?path="+path}>
-                    <img alt={image.Name} src={"data:image/jpeg;base64," + image.Image}/>
-                </a>
-            })
+            if (this.state.entries.Files.length === 0) {
+                images = <div><b>Loading...</b></div>
+            } else {
+                images = this.state.entries.Files.map((image) => {
+                    const path = this.props.path.replace("/\/$/","") + "/" + image.Name;
+                    return <a key={image.Name} href={"http://localhost:8080/download?path="+path}>
+                        <img alt={image.Name} src={"data:image/jpeg;base64," + image.Image}/>
+                    </a>
+                })
+            }
         }
 
-        return (
+            return (
             <div>
-                <div>
-                    <b>Path:</b> {this.props.path}
-                </div>
-                <div align={"left"}>
-                    <Tree path={this.props.path} dirs={this.state.entries.Directories}/>
-                </div>
-                <div align={"right"}>
-                    {images}
-                </div>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td valign={"top"}><Tree path={this.props.path} dirs={this.state.entries.Directories}/></td>
+                            <td>{images}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         )
     }
