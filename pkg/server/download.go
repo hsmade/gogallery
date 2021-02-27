@@ -13,6 +13,9 @@ import (
 // downloadHandler handles downloading a file
 func (s *Server) downloadHandler(w http.ResponseWriter, r *http.Request) {
 	logrus.Debugf("downloadHandler called with %v", r.URL.RawQuery)
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	filePath, ok := r.URL.Query()["path"]
 	if !ok {
 		Error{Message: "missing path parameter"}.Send(w)

@@ -17,6 +17,9 @@ import (
 // listHandler handles listing a directory
 func (s *Server) listHandler(w http.ResponseWriter, r *http.Request) {
 	logrus.Debugf("listHandler called with %v", r.URL.RawQuery)
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	filePath, ok := r.URL.Query()["path"]
 	if !ok {
 		Error{Message: "missing path parameter"}.Send(w)
@@ -37,7 +40,6 @@ func (s *Server) listHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(200)
-	w.Header().Set("Content-Type", "application/json")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go helpers.Keepalive(ctx, w)
@@ -64,10 +66,20 @@ func getOrCreateIndex(path string) (Index, error) {
 	//   date
 	//   location?
 	//   thumb
-	thumbsDb, err := thumbs.Create(path)
-	if err != nil {
-		return Index{}, errors.Wrap(err, "generating thumbs")
+	var thumbsDb thumbs.Thumbs
+	_, err := os.Stat(filepath.Join(path, "thumbs.bin"))
+	if os.IsNotExist(err) {
+		thumbsDb, err = thumbs.Create(path)
+		if err != nil {
+			return Index{}, errors.Wrap(err, "create thumbs file")
+		}
+	} else {
+		thumbsDb, err = thumbs.Load(path)
+		if err != nil {
+			return Index{}, errors.Wrap(err, "load thumbs file")
+		}
 	}
+
 
 	directories, err := helpers.GetDirs(path)
 	if err != nil {
