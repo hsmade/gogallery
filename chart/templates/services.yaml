@@ -1,19 +1,19 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: gogallery-backend
+  name: {{ .Release.Name }}-backend
 spec:
   selector:
-    app: gogallery-backend
+    app: {{ .Release.Name }}-backend
   ports:
     - port: 80
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: gogallery-frontend
+  name: {{ .Release.Name }}-frontend
 spec:
   selector:
-    app: gogallery-frontend
+    app: {{ .Release.Name }}-frontend
   ports:
     - port: 80

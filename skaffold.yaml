@@ -11,7 +11,12 @@ build:
     docker:
       dockerfile: Dockerfile.frontend
 deploy:
-  kubectl:
-    manifests:
-    - manifests/deployments.yaml
-    - manifests/services.yaml
+  helm:
+    releases:
+      - name: gogallery
+        chartPath: chart
+        setValues:
+          ingress.istio.enabled: false
+        artifactOverrides:
+          frontend.image: frontend
+          backend.image: backend

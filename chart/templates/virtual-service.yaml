@@ -1,0 +1,26 @@
+{{ if .Values.ingress.istio.enabled }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  hosts:
+    - {{ .Values.ingress.hostname }}
+  gateways:
+    - {{ .Values.ingress.istio.gateway }}
+  http:
+    - name: "backend"
+      match:
+        - uri:
+            prefix: "/list"
+        - uri:
+            prefix: "/download"
+      route:
+        - destination:
+            host: {{ .Release.Name }}-backend
+    - name: "frontend"
+      route:
+        - destination:
+            host: {{ .Release.Name }}-frontend
+{{ end }}

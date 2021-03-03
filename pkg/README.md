@@ -1,5 +1,8 @@
 # Backend server
 
+## Requirements
+ * exiftool
+
 ## Starting the server
 See [here](../cmd/README.md) on how to start a new backend server.
 

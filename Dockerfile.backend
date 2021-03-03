@@ -1,13 +1,13 @@
 FROM golang:1.16
 WORKDIR /app
-RUN apt update
-RUN apt install -y protobuf-compiler/stable exiftool ffmpeg
+RUN apt update && apt install -y protobuf-compiler/stable exiftool && apt clean && rm -r /var/lib/apt/lists/*
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.25.0
 COPY go.mod /app/go.mod
 RUN go mod download
-COPY . /app/
+COPY cmd /app/cmd
+COPY pkg /app/pkg
 #RUN go test ./...
 RUN go vet ./...
 RUN go generate ./...
 RUN go build cmd/gogallery.go
-ENTRYPOINT /app/gogallery
+ENTRYPOINT ["/app/gogallery"]

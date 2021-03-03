@@ -1,0 +1,13 @@
+frontend:
+  image: hsmade/gogallery-frontend
+  replicas: 1
+backend:
+  image: hsmade/gogallery-backend
+  replicas: 1
+  rootPath: /foo/bar
+  verbose: true
+ingress:
+  hostname: www.domain.tld
+  istio:
+    enabled: false # don't register an `Ingress` but register a `VirtualService` instead
+    gateway: public # the istio gateway to bind to
