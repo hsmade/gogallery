@@ -7,6 +7,7 @@ backend:
   rootPath: /foo/bar
   rootPathFromHost: true
   verbose: true
+  cpuLimit: 1 # amount of cpu cores allowed
 ingress:
   hostname: www.domain.tld
   istio:

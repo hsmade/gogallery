@@ -27,6 +27,9 @@ spec:
             {{- if .Values.backend.verbose }}
             - "-verbose"
             {{- end }}
+          resources:
+            limits:
+              cpu: "{{ .Values.backend.cpuLimit }}"
           ports:
             - containerPort: 80
               name: http
