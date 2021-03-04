@@ -19,13 +19,27 @@ spec:
           image: {{ .Values.backend.image }}
           args:
             - "-root-path"
+            {{- if .Values.backend.rootPathFromHost }}
+            - "/data"
+            {{- else }}
             - {{ .Values.backend.rootPath }}
+            {{- end }}
             {{- if .Values.backend.verbose }}
             - "-verbose"
             {{- end }}
           ports:
             - containerPort: 80
               name: http
+{{- if .Values.backend.rootPathFromHost }}
+          volumeMounts:
+            - mountPath: /data
+              name: data
+      volumes:
+        - name: data
+          hostPath:
+            path: {{ .Values.backend.rootPath }}
+            type: Directory
+{{- end }}
 ---
 apiVersion: apps/v1
 kind: Deployment

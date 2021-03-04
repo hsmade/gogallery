@@ -5,6 +5,7 @@ backend:
   image: hsmade/gogallery-backend:latest
   replicas: 1
   rootPath: /foo/bar
+  rootPathFromHost: true
   verbose: true
 ingress:
   hostname: www.domain.tld
