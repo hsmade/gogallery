@@ -18,6 +18,8 @@ deploy:
         setValues:
           ingress.istio.enabled: false
           backend.rootPath: /app/pkg/testfiles
+          backend.rootPathFromHost: false
+          imageConfig.pullPolicy: IfNotPresent
         artifactOverrides:
           frontend.image: frontend
           backend.image: backend

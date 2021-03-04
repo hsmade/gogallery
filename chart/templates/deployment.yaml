@@ -17,6 +17,12 @@ spec:
       containers:
         - name: backend
           image: {{ .Values.backend.image }}
+
+        # this imagePullPolicy value is now invalid,
+        # because it was overwritten through the `image` value from the skaffold.yaml!
+
+        # let's redefine it in the `values.yaml` so we can keep it here.
+          imagePullPolicy: {{ .Values.imageConfig.pullPolicy }}
           args:
             - "-root-path"
             {{- if .Values.backend.rootPathFromHost }}
@@ -63,6 +69,12 @@ spec:
       containers:
         - name: frontend
           image: {{ .Values.frontend.image }}
+
+        # this imagePullPolicy value is now invalid,
+        # because it was overwritten through the `image` value from the skaffold.yaml!
+
+        # let's redefine it in the `values.yaml` so we can keep it here.
+          imagePullPolicy: {{ .Values.imageConfig.pullPolicy }}
           ports:
             - containerPort: 80
               name: http

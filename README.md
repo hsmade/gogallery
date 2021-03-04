@@ -31,3 +31,5 @@ kind delete cluster --name gogallery
  * recreate thumbs.bin when dir has changed / is newer
  * stream data/info to user when creating thumb
  * make sure the tree doesn't get squashed
+ * differentiate in response to the user between loading and creating a thumbs file
+ * make thumbnail creation less heavy on the system load (iowait)

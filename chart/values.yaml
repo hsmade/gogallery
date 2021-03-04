@@ -13,3 +13,5 @@ ingress:
   istio:
     enabled: false # don't register an `Ingress` but register a `VirtualService` instead
     gateway: public # the istio gateway to bind to
+imageConfig:
+  pullPolicy: Always # IfNotPresent

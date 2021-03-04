@@ -1,41 +1,95 @@
 import React, {Component} from 'react';
+import TreeMenu from 'react-simple-tree-menu'
 
 class Tree extends Component {
     render() {
-        console.log("tree", this.props)
+        console.log("Tree.render() props:", this.props)
 
-        // split of "/" results in ["",""]
-        let pathParts
-        if (this.props.path === "/" || this.props.path === null) {
-            pathParts = [""]
-        } else {
-            pathParts = this.props.path.split("/")
-        }
+        const tree = CreateTree(this.props.path || "", this.props.dirs)
+        console.log("final tree structure", tree)
+
+        let openNodes = ["root"]
+        this.props.path.split("/").map((dir) => {
+            if (dir !== ""){
+                openNodes.push([openNodes[openNodes.length-1], dir].join("/"))
+            }
+        })
+        console.log("openNodes:", openNodes)
         return (
             <div>
-                {treeItem([], pathParts, this.props.dirs || [])}
+                <TreeMenu
+                    cacheSearch
+                    data={[tree]}
+                    debounceTime={125}
+                    initialOpenNodes={openNodes}
+                    // disableKeyboard={false}
+                    // hasSearch={false}
+                    onClickItem={({ key, label, ...props }) => {
+                        console.log("Clicked key:",key, "label:",label, "props",props)
+                        window.location = window.location.href.split("=")[0] + "=" + key.replace(/^root/,"")
+                    }}
+                    resetOpenNodesOnDataUpdate={false}
+                />
             </div>
         );
     }
 }
 
-// function that renders a <ul> with the first part of `right` as item
-// Then calls itself with left having that part pushed into it.
-function treeItem(left, right, dirs) {
-    if (right.length === 0) {
-        const items = dirs.map((dir) =>
-            <li key={dir}><a href={"?path=" + left.join("/")  + "/" + dir}>|- {dir}</a></li>
-        )
-        return <ul>{items}</ul>
+export function CreateTree(path, dirs) {
+    const pathParts = path.split("/")
+    const left = pathParts[0]
+    const right = pathParts.splice(1).join("/")
+    let tree = {}
+    if (left === "") { // we are in root
+        tree = {
+            key: "root",
+            label: "/",
+            nodes: []
+        }
+    } else { // we are somewhere else
+        tree = {
+            key: left,
+            label: left,
+            nodes: []
+        }
     }
 
-    const current = right.shift()
-    left.push(current)
-    return <ul>
-        <li>
-            <a href={"?path=" + left.join("/")}>|- {current}/</a>
-        </li>
-        {treeItem(left, right, dirs)}</ul>
+    if (right === "" ) { // we are at the end already
+        dirs.map((dir) => {
+            tree.nodes.push({
+                key: dir,
+                label: dir,
+            })
+        })
+        return tree
+    }
+
+    // since we're in between the root and the end, recurse
+    tree.nodes.push(CreateTree(right, dirs))
+    return tree
 }
+// export function CreateTree(path, item, dirs) {
+//     console.log("createTree called: path:", path, "item:", item,"dirs:", dirs)
+//     const itemParts = item.split("/")
+//     console.log("itemParts:", itemParts)
+//     const key = [path,itemParts[0]].join("/").replaceAll("//","/")
+//     let newTree = {
+//         key: key,
+//         label: itemParts[0] || "/",
+//         nodes: []
+//     }
+//     if (itemParts.length === 1 || path === null){ // end of the tree
+//         dirs.map((dir) => {
+//             newTree.nodes.push({
+//                 key: [path, dir].join("/").replaceAll("//","/").replace("//","/"),
+//                 label: dir,
+//             })
+//         })
+//         return newTree
+//     } else { // walk further
+//         newTree.nodes.push(CreateTree([path,itemParts[0]].join("/"), itemParts.splice(1).join("/"), dirs))
+//         return newTree
+//     }
+// }
 
 export default Tree
