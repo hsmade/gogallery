@@ -1,8 +1,8 @@
 frontend:
-  image: hsmade/gogallery-frontend
+  image: hsmade/gogallery-frontend:latest
   replicas: 1
 backend:
-  image: hsmade/gogallery-backend
+  image: hsmade/gogallery-backend:latest
   replicas: 1
   rootPath: /foo/bar
   verbose: true
