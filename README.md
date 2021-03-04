@@ -25,3 +25,9 @@ skaffold dev
  ```bash
 kind delete cluster --name gogallery
  ```
+
+## Todo
+ * finalise tests
+ * recreate thumbs.bin when dir has changed / is newer
+ * stream data/info to user when creating thumb
+ * make sure the tree doesn't get squashed
