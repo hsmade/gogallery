@@ -22,8 +22,9 @@ class Tree extends Component {
                     data={[tree]}
                     debounceTime={125}
                     initialOpenNodes={openNodes}
-                    // disableKeyboard={false}
-                    // hasSearch={false}
+                    // initialFocusKey={openNodes[openNodes.length-1]}
+                    disableKeyboard={false}
+                    hasSearch={true}
                     onClickItem={({ key, label, ...props }) => {
                         console.log("Clicked key:",key, "label:",label, "props",props)
                         window.location = window.location.href.split("=")[0] + "=" + key.replace(/^root/,"")
