@@ -56,7 +56,7 @@ class IndexViewer extends Component {
                 <table>
                     <tbody>
                         <tr>
-                            <td valign={"top"}><Tree path={this.props.path} dirs={this.state.entries.Directories}/></td>
+                            <td valign={"top"} width={"15%"}><Tree path={this.props.path} dirs={this.state.entries.Directories}/></td>
                             <td>{images}</td>
                         </tr>
                     </tbody>

@@ -60,14 +60,8 @@ type Index struct {
 // getOrCreateIndex will check for the thumbs.db file to be there and create one if it's older than the directory or
 // nonexistent. getOrCreateIndex will return a list of files and directory objects
 func getOrCreateIndex(path string) (Index, error) {
-
-	// serialize list of struct
-	//   filename
-	//   date
-	//   location?
-	//   thumb
 	var thumbsDb thumbs.Thumbs
-	_, err := os.Stat(filepath.Join(path, "thumbs.bin"))
+	_, err := os.Stat(filepath.Join(path, "thumbs.bin")) // FIXME: also recreate if older than parent dir
 	if os.IsNotExist(err) {
 		thumbsDb, err = thumbs.Create(path)
 		if err != nil {
