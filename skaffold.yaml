@@ -17,6 +17,7 @@ deploy:
         chartPath: chart
         setValues:
           ingress.istio.enabled: false
+          backend.rootPath: /app/pkg/testfiles
         artifactOverrides:
           frontend.image: frontend
           backend.image: backend

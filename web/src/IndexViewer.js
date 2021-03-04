@@ -6,6 +6,7 @@ class IndexViewer extends Component {
         super(props);
 
         this.state = {
+            error: "",
             entries: {
                 Directories: [],
                 Files: []
@@ -13,7 +14,19 @@ class IndexViewer extends Component {
         };
     }
     componentDidMount() {
-        fetch("http://localhost:8080/list?path=" + this.props.path).then(res => res.json().then(data => this.setState({entries: data})))
+        if (this.props.path === null) {
+            this.props.path = "/"
+        }
+        fetch("/list?path=" + this.props.path)
+            .then(res => {
+                if (res.ok) {
+                    res.json()
+                        .then(data => this.setState({entries: data}))
+                } else {
+                    this.setState({error: res.text()})
+                }
+            })
+            .catch((reason) => this.setState({error: reason.toString()}))
     }
 
     render() {
@@ -21,12 +34,17 @@ class IndexViewer extends Component {
 
         let images
         if (this.state.entries.Files != null) {
-            if (this.state.entries.Files.length === 0) {
-                images = <div><b>Loading...</b></div>
+            if (this.state.error) {
+                images = <div>{this.state.error}</div>
+            }
+            else if (this.state.entries.Files.length === 0) {
+                images = <div>
+                    <b>Loading...</b>
+                </div>
             } else {
                 images = this.state.entries.Files.map((image) => {
                     const path = this.props.path.replace("/\/$/","") + "/" + image.Name;
-                    return <a key={image.Name} href={"http://localhost:8080/download?path="+path}>
+                    return <a key={image.Name} href={"/download?path="+path}>
                         <img alt={image.Name} src={"data:image/jpeg;base64," + image.Image}/>
                     </a>
                 })

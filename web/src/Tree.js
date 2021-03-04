@@ -2,9 +2,18 @@ import React, {Component} from 'react';
 
 class Tree extends Component {
     render() {
+        console.log("tree", this.props)
+
+        // split of "/" results in ["",""]
+        let pathParts
+        if (this.props.path === "/" || this.props.path === null) {
+            pathParts = [""]
+        } else {
+            pathParts = this.props.path.split("/")
+        }
         return (
             <div>
-                {treeItem([], this.props.path.split("/"), this.props.dirs)}
+                {treeItem([], pathParts, this.props.dirs || [])}
             </div>
         );
     }
